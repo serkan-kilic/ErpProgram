@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Windows.Forms;
+using DevExpress.DataAccess.Native.ExpressionEditor;
 
 namespace UI.Forms
 {
@@ -27,6 +28,8 @@ namespace UI.Forms
         //gridviewda düzenle olmiyacak
 
         //ordercode rastgele üretilecek ve değiştirilemeyecek.
+
+        //orderlineda stok girşi yapıp save etmediğim veriyi silip tekrar ekleyince datada veri kaldığı için tekrar ekldiğimde verinin stokgirişi dolu oluyor bunu düzelt
         private readonly IOrderService _orderService;
         private readonly IPaymentService _paymentService;
         private readonly IOrderTypeService _orderTypeService;
@@ -34,10 +37,13 @@ namespace UI.Forms
         private readonly ICustomerService _customerService;
         private readonly IItemService _itemService;
         private readonly IOrderLineService _orderlineService;
-        private int selectedCustomerId, selectedEditCustomerId, selectedOrderId, selectedOrderLineItemId;
+        private readonly IStockOnHandService _stockOnHandService;
+        private readonly IOrderStockReservationService _orderStockReservationService;
+        private int selectedCustomerId, selectedEditCustomerId, selectedOrderId;
+        public Dictionary<string, orderstockreservation> data = new Dictionary<string, orderstockreservation>();
         private DataTable _orderLineTable = CreateOrderLineTable();
 
-        public OrderForm(IOrderService orderService, IPaymentService paymentService, IOrderTypeService orderTypeService, IOrderStatusService orderStatusService, ICustomerService customerService, IItemService itemService, IOrderLineService orderLineService)
+        public OrderForm(IOrderService orderService, IPaymentService paymentService, IOrderTypeService orderTypeService, IOrderStatusService orderStatusService, ICustomerService customerService, IItemService itemService, IOrderLineService orderLineService, IStockOnHandService stockOnHandService, IOrderStockReservationService orderStockReservationService)
         {
             InitializeComponent();
             formName = "Sipariş Satış Yönetim";
@@ -50,9 +56,10 @@ namespace UI.Forms
             _customerService = customerService;
             _itemService = itemService;
             _orderlineService = orderLineService;
+            _stockOnHandService = stockOnHandService;
 
             gCOrderLineList.DataSource = _orderLineTable;
-
+            _orderStockReservationService = orderStockReservationService;
         }
         private static DataTable CreateOrderLineTable()
         {
@@ -68,12 +75,13 @@ namespace UI.Forms
             dt.DefaultView.RowFilter = "deleted <> 'd'";
             return dt;
         }
-        
-        
+
+
         protected override void SaveData()
         {
             try
             {
+                CheckStock();
                 var saveData = GetOrderFromForm();
                 _orderService.TAdd(saveData);
                 _selectedId = saveData.id;
@@ -84,6 +92,10 @@ namespace UI.Forms
             catch (FluentValidation.ValidationException ex)
             {
                 MessageBox.Show(ex.Errors.First().ErrorMessage, "Hata!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Hata!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         protected override void ListData()
@@ -114,6 +126,7 @@ namespace UI.Forms
         {
             try
             {
+                CheckStock();
                 var updateData = GetOrderFromForm();
                 _orderService.TUpdate(updateData);
                 SaveOrderLines(updateData.id);
@@ -124,7 +137,10 @@ namespace UI.Forms
             {
                 MessageBox.Show(ex.Errors.First().ErrorMessage, "Hata!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Hata!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         protected override void DeleteData()
         {
@@ -161,7 +177,7 @@ namespace UI.Forms
 
             txtEditOrderCode.Text = GenerateRandomCode();
             LoadOrderLines(0);
-
+            data.Clear();
             ListData();
         }
         protected override void CloseWindow()
@@ -196,7 +212,7 @@ namespace UI.Forms
             }
             GCList.DataSource = query.ToList();
         }
-        
+
         private int LUEValueReader(LookUpEdit lue)
         {
             int id = 0;
@@ -289,6 +305,11 @@ namespace UI.Forms
             {
                 total += Convert.ToDecimal(gVOrderLineList.GetRowCellValue(i, "itemtotalprice"));
             }
+            if (gVOrderLineList.IsNewItemRow(gVOrderLineList.FocusedRowHandle))
+            {
+                total += Convert.ToDecimal(
+                    gVOrderLineList.GetRowCellValue(gVOrderLineList.FocusedRowHandle, "itemtotalprice"));
+            }
             txtOrderTotalPrice.Text = total.ToString();
         }
         private void SaveOrderLines(int orderId)
@@ -306,15 +327,16 @@ namespace UI.Forms
                     {
                         continue;
                     }
-
-                    _orderlineService.TAdd(new orderline
+                    var newLine = new orderline
                     {
                         orderid = orderId,
                         itemid = Convert.ToInt32(row["itemid"]),
                         itemcount = Convert.ToInt32(row["itemcount"]),
                         itemtotalprice = Convert.ToDecimal(row["itemtotalprice"]),
                         deleted = ""
-                    });
+                    };
+                    _orderlineService.TAdd(newLine);
+                    SaveStocks(newLine.itemid, newLine.id);
                 }
                 else if (row.RowState == DataRowState.Modified)
                 {
@@ -334,10 +356,39 @@ namespace UI.Forms
                     }
 
                     _orderlineService.TUpdate(updateLine);
+                    SaveStocks(updateLine.itemid, updateLine.id);
+                }
+                else if (row.RowState == DataRowState.Unchanged)
+                {
+                    SaveStocks(Convert.ToInt32(row["itemid"]), Convert.ToInt32(row["id"]));
                 }
             }
-
             LoadOrderLines(orderId);
+        }
+        private void SaveStocks(int itemId, int orderlineId)
+        {
+            var stockReservations = _stockOnHandService.TGetAll().Where(s => s.itemid == itemId);
+            foreach (var sr in stockReservations)
+            {
+                data.TryGetValue(sr.batchnumber, out orderstockreservation line);
+                {
+                    if (line != null)
+                    {
+                        if (line.id > 0)
+                        {
+                            _orderStockReservationService.TUpdate(line);
+                        }
+                        else
+                        {
+                            line.orderlineid = orderlineId;
+                            _orderStockReservationService.TAdd(line);
+                        }
+                        var stock = _stockOnHandService.TGetById(line.stockid);
+                        stock.itemcount -= line.selectedcount;
+                        _stockOnHandService.TUpdate(stock);
+                    }
+                }
+            }
         }
         private void CustomerDesicionTCorVkn(int customerId, ButtonEdit btn)
         {
@@ -371,6 +422,29 @@ namespace UI.Forms
             while (_orderService.TGetAll().Any(o => o.ordercode == result));
 
             return result;
+        }
+        private void CheckStock()
+        {
+            foreach (DataRow row in _orderLineTable.Rows)
+            {
+                int requiredItemCount = Convert.ToInt32(row["itemcount"]);
+                int itemId = Convert.ToInt32(row["itemid"]);
+                int sum = 0;
+
+
+                var stocks = _stockOnHandService.TGetAll().Where(s => s.itemid == itemId);
+                foreach (var stock in stocks)
+                {
+                    if (data.TryGetValue(stock.batchnumber, out var line))
+                    {
+                        sum += line.selectedcount;
+                    }
+                }
+                if (sum != requiredItemCount)
+                {
+                    throw new Exception($"{row["itemcode"]} Bu ürün koduna sahip ürünün stok girişinde eksik var");
+                }
+            }
         }
         private void OrderForm_Load(object sender, EventArgs e)
         {
@@ -458,21 +532,36 @@ namespace UI.Forms
                 selectedCustomerId = 0;
             }
         }
+        private void RemoveData(int itemId)
+        {
+            var batchNumbers = _stockOnHandService.TGetAll().Where(s => s.itemid == itemId).Select(s => s.batchnumber).ToList();
+            foreach (var b in batchNumbers)
+            {
+                data.Remove(b);
+            }
+        }
         private void repoOrderlineDelete_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
             var row = gVOrderLineList.GetFocusedDataRow();
-            if (row != null)
+            if (row == null)
             {
-                if (row.RowState == DataRowState.Added)
-                {
-                    row.Delete();
-                }
-                else
-                {
-                    row["deleted"] = "d";
-                }
-                UpdateOrderTotal();
+                return;
             }
+            int id = Convert.ToInt32(row["id"]);
+            int itemId = Convert.ToInt32(row["itemid"]);
+
+            if (id>0)
+            {
+                _orderlineService.TDeleteLineWithStocks(id);
+                LoadOrderLines(Convert.ToInt32(row["orderid"]));
+                RemoveData(itemId);
+            }
+            else
+            {
+                RemoveData(itemId);
+                row.Delete();
+            }
+            UpdateOrderTotal();
         }
 
         private void btnTCKNVKN_EditValueChanged(object sender, EventArgs e)
@@ -502,7 +591,7 @@ namespace UI.Forms
 
         private void repoBtnItemSelect_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            selectedOrderLineItemId = SelectEntity(_itemService.TGetAll().ToList(), "Ürün Seçim Sayfası");
+            var selectedOrderLineItemId = SelectEntity(_itemService.TGetAll().ToList(), "Ürün Seçim Sayfası");
             if (selectedOrderLineItemId == 0)
             {
                 return;
@@ -519,7 +608,19 @@ namespace UI.Forms
         {
             gVOrderLineList.SetRowCellValue(e.RowHandle, "orderid", _selectedId);
         }
-
+        private void UpdateOrderStock(int orderlineId)
+        {
+            var linestock = _orderStockReservationService.TGetAll().Where(o => o.orderlineid == orderlineId);
+            foreach (var ls in linestock)
+            {
+                var stock = _stockOnHandService.TGetAll().FirstOrDefault(s => s.id == ls.stockid);
+                if (stock != null)
+                {
+                    stock.itemcount += ls.selectedcount;
+                }
+                ls.selectedcount = 0;
+            }
+        }
         private void gVOrderLineList_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
         {
             decimal price = Convert.ToDecimal(gVOrderLineList.GetRowCellValue(e.RowHandle, "unitprice"));
@@ -529,32 +630,39 @@ namespace UI.Forms
             }
             if (price > 0)
             {
-                if (e.Column.FieldName == "itemcount" || e.Column.FieldName == "unitprice")
+                if (e.Column.FieldName == "itemcount")
                 {
                     int count = Convert.ToInt32(gVOrderLineList.GetRowCellValue(e.RowHandle, "itemcount"));
                     decimal newItemTotalPrice = count * price;
                     decimal oldItemTotalPrice = Convert.ToDecimal(gVOrderLineList.GetRowCellValue(e.RowHandle, "itemtotalprice"));
+                    int lineId = Convert.ToInt32(gVOrderLineList.GetRowCellValue(e.RowHandle, "id"));
 
                     if (newItemTotalPrice != oldItemTotalPrice)
                     {
                         gVOrderLineList.SetFocusedRowCellValue("itemtotalprice", newItemTotalPrice);
+                        UpdateOrderStock(lineId);
                     }
+                    UpdateOrderTotal();
+
                 }
                 else if (e.Column.FieldName == "itemtotalprice")
                 {
                     decimal itemtotalprice = Convert.ToDecimal(gVOrderLineList.GetRowCellValue(e.RowHandle, "itemtotalprice"));
                     int newItemCount = (int)Math.Floor(itemtotalprice / price);
                     int oldItemCount = Convert.ToInt32(gVOrderLineList.GetRowCellValue(e.RowHandle, "itemcount"));
-
+                    int lineId = Convert.ToInt32(gVOrderLineList.GetRowCellValue(e.RowHandle, "id"));
+                    
                     if (newItemCount != oldItemCount)
                     {
                         gVOrderLineList.SetFocusedRowCellValue("itemcount", newItemCount);
+                        UpdateOrderStock(lineId);
                     }
+                    UpdateOrderTotal();
                 }
             }
         }
 
-        private void gVOrderLineList_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
+            private void gVOrderLineList_FocusedRowChanged(object sender, DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventArgs e)
         {
             if (e.FocusedRowHandle == DevExpress.XtraGrid.GridControl.NewItemRowHandle)
             {
@@ -572,15 +680,23 @@ namespace UI.Forms
 
         private void repoBtnStockEntry_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            int orderlineId = Convert.ToInt32(gVOrderLineList.GetFocusedRowCellValue("id"));
-            if (orderlineId > 0)
+            var sp = Program.serviceProvider;
+            var itemId = Convert.ToInt32(gVOrderLineList.GetFocusedRowCellValue("itemid"));
+            if (itemId != 0)
             {
-                var sp = Program.serviceProvider;
-
+                int orderlineId = 0, requredItemCount = 0;
+                if (gVOrderLineList.GetFocusedRowCellValue("id") != null)
+                {
+                    orderlineId = Convert.ToInt32(gVOrderLineList.GetFocusedRowCellValue("id"));
+                }
+                if (gVOrderLineList.GetFocusedRowCellValue("itemcount") != null)
+                {
+                    requredItemCount = Convert.ToInt32(gVOrderLineList.GetFocusedRowCellValue("itemcount"));
+                }
                 var reservationService = sp.GetRequiredService<IOrderStockReservationService>();
                 var stockService = sp.GetRequiredService<IStockOnHandService>();
 
-                var orderStockForm = new OrderStockForm(orderlineId, reservationService, stockService, _orderlineService, _itemService,_orderService);
+                var orderStockForm = new OrderStockForm(data, itemId, orderlineId, requredItemCount, reservationService, stockService, _orderlineService, _itemService);
                 orderStockForm.Show();
             }
         }

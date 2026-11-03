@@ -7,6 +7,6 @@ namespace DataAccess.Abstract
 {
     public interface IOrderLineRepository : IGenericRepository<orderline>
     {
-
+        void DeleteLineWithStocks(int orderlineId);
     }
 }

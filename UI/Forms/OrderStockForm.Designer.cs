@@ -44,20 +44,16 @@
             gCOrderLineId = new DevExpress.XtraGrid.Columns.GridColumn();
             gCStockId = new DevExpress.XtraGrid.Columns.GridColumn();
             gCBatchNumber = new DevExpress.XtraGrid.Columns.GridColumn();
-            repoBtnBatchNumber = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
             gCStockItemCount = new DevExpress.XtraGrid.Columns.GridColumn();
             gCSeletedCount = new DevExpress.XtraGrid.Columns.GridColumn();
             gCRemainingStockCount = new DevExpress.XtraGrid.Columns.GridColumn();
-            gCDeleted = new DevExpress.XtraGrid.Columns.GridColumn();
-            repoBtnOrderStockDelete = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
-            repoLUItemCode = new DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit();
             panelControl2 = new DevExpress.XtraEditors.PanelControl();
+            BtnDecline = new DevExpress.XtraEditors.SimpleButton();
+            btnAccept = new DevExpress.XtraEditors.SimpleButton();
             txtRequiredItemCount = new DevExpress.XtraEditors.TextEdit();
             labelControl7 = new DevExpress.XtraEditors.LabelControl();
-            txtOrderCode = new DevExpress.XtraEditors.TextEdit();
             txtItemCode = new DevExpress.XtraEditors.TextEdit();
             txtItemName = new DevExpress.XtraEditors.TextEdit();
-            labelControl6 = new DevExpress.XtraEditors.LabelControl();
             labelControl5 = new DevExpress.XtraEditors.LabelControl();
             labelControl4 = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)panelControl1).BeginInit();
@@ -71,13 +67,9 @@
             groupControl2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)GCList).BeginInit();
             ((System.ComponentModel.ISupportInitialize)GVList).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)repoBtnBatchNumber).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)repoBtnOrderStockDelete).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)repoLUItemCode).BeginInit();
             ((System.ComponentModel.ISupportInitialize)panelControl2).BeginInit();
             panelControl2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)txtRequiredItemCount.Properties).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)txtOrderCode.Properties).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtItemCode.Properties).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtItemName.Properties).BeginInit();
             SuspendLayout();
@@ -165,9 +157,9 @@
             groupControl1.Controls.Add(groupControl2);
             groupControl1.Controls.Add(panelControl2);
             groupControl1.Dock = DockStyle.Fill;
-            groupControl1.Location = new Point(0, 64);
+            groupControl1.Location = new Point(0, 0);
             groupControl1.Name = "groupControl1";
-            groupControl1.Size = new Size(1298, 510);
+            groupControl1.Size = new Size(1218, 574);
             groupControl1.TabIndex = 2;
             groupControl1.Text = "Bilgi";
             // 
@@ -178,7 +170,7 @@
             groupControl2.Dock = DockStyle.Fill;
             groupControl2.Location = new Point(2, 123);
             groupControl2.Name = "groupControl2";
-            groupControl2.Size = new Size(1294, 385);
+            groupControl2.Size = new Size(1214, 449);
             groupControl2.TabIndex = 1;
             groupControl2.Text = "Liste";
             // 
@@ -188,20 +180,16 @@
             GCList.Location = new Point(2, 23);
             GCList.MainView = GVList;
             GCList.Name = "GCList";
-            GCList.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] { repoBtnOrderStockDelete, repoBtnBatchNumber, repoLUItemCode });
-            GCList.Size = new Size(1290, 360);
+            GCList.Size = new Size(1210, 424);
             GCList.TabIndex = 0;
             GCList.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { GVList });
             // 
             // GVList
             // 
-            GVList.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] { gCId, gCOrderLineId, gCStockId, gCBatchNumber, gCStockItemCount, gCSeletedCount, gCRemainingStockCount, gCDeleted });
+            GVList.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] { gCId, gCOrderLineId, gCStockId, gCBatchNumber, gCStockItemCount, gCSeletedCount, gCRemainingStockCount });
             GVList.GridControl = GCList;
             GVList.Name = "GVList";
-            GVList.OptionsView.NewItemRowPosition = DevExpress.XtraGrid.Views.Grid.NewItemRowPosition.Bottom;
             GVList.OptionsView.ShowGroupPanel = false;
-            GVList.ShowingEditor += GVList_ShowingEditor;
-            GVList.FocusedRowChanged += GVList_FocusedRowChanged;
             GVList.CellValueChanged += GVList_CellValueChanged;
             // 
             // gCId
@@ -229,19 +217,12 @@
             gCBatchNumber.AppearanceCell.Options.UseTextOptions = true;
             gCBatchNumber.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             gCBatchNumber.Caption = "Parti Numarası";
-            gCBatchNumber.ColumnEdit = repoBtnBatchNumber;
             gCBatchNumber.FieldName = "batchnumber";
             gCBatchNumber.Name = "gCBatchNumber";
+            gCBatchNumber.OptionsColumn.AllowEdit = false;
             gCBatchNumber.Visible = true;
             gCBatchNumber.VisibleIndex = 0;
             gCBatchNumber.Width = 1000;
-            // 
-            // repoBtnBatchNumber
-            // 
-            repoBtnBatchNumber.AutoHeight = false;
-            repoBtnBatchNumber.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton() });
-            repoBtnBatchNumber.Name = "repoBtnBatchNumber";
-            repoBtnBatchNumber.ButtonClick += repoBtnBatchNumber_ButtonClick;
             // 
             // gCStockItemCount
             // 
@@ -279,56 +260,71 @@
             gCRemainingStockCount.VisibleIndex = 3;
             gCRemainingStockCount.Width = 1000;
             // 
-            // gCDeleted
-            // 
-            gCDeleted.Caption = "Sil";
-            gCDeleted.ColumnEdit = repoBtnOrderStockDelete;
-            gCDeleted.FieldName = "deleted";
-            gCDeleted.Name = "gCDeleted";
-            gCDeleted.Visible = true;
-            gCDeleted.VisibleIndex = 4;
-            gCDeleted.Width = 30;
-            // 
-            // repoBtnOrderStockDelete
-            // 
-            repoBtnOrderStockDelete.AutoHeight = false;
-            repoBtnOrderStockDelete.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Minus) });
-            repoBtnOrderStockDelete.Name = "repoBtnOrderStockDelete";
-            repoBtnOrderStockDelete.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.HideTextEditor;
-            repoBtnOrderStockDelete.ButtonClick += repoBtnOrderStockDelete_ButtonClick;
-            // 
-            // repoLUItemCode
-            // 
-            repoLUItemCode.AutoHeight = false;
-            repoLUItemCode.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo) });
-            repoLUItemCode.DisplayMember = "itemcode";
-            repoLUItemCode.Name = "repoLUItemCode";
-            repoLUItemCode.NullText = "";
-            repoLUItemCode.ValueMember = "id";
-            // 
             // panelControl2
             // 
             panelControl2.Appearance.BackColor = Color.FromArgb(224, 224, 224);
             panelControl2.Appearance.Options.UseBackColor = true;
             panelControl2.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            panelControl2.Controls.Add(BtnDecline);
+            panelControl2.Controls.Add(btnAccept);
             panelControl2.Controls.Add(txtRequiredItemCount);
             panelControl2.Controls.Add(labelControl7);
-            panelControl2.Controls.Add(txtOrderCode);
             panelControl2.Controls.Add(txtItemCode);
             panelControl2.Controls.Add(txtItemName);
-            panelControl2.Controls.Add(labelControl6);
             panelControl2.Controls.Add(labelControl5);
             panelControl2.Controls.Add(labelControl4);
             panelControl2.Dock = DockStyle.Top;
             panelControl2.Location = new Point(2, 23);
             panelControl2.Name = "panelControl2";
-            panelControl2.Size = new Size(1294, 100);
+            panelControl2.Size = new Size(1214, 100);
             panelControl2.TabIndex = 0;
+            // 
+            // BtnDecline
+            // 
+            BtnDecline.Appearance.BackColor = Color.Gray;
+            BtnDecline.Appearance.BorderColor = Color.FromArgb(224, 224, 224);
+            BtnDecline.Appearance.ForeColor = Color.Transparent;
+            BtnDecline.Appearance.Options.UseBackColor = true;
+            BtnDecline.Appearance.Options.UseBorderColor = true;
+            BtnDecline.Appearance.Options.UseForeColor = true;
+            BtnDecline.AppearanceHovered.BackColor = Color.Gray;
+            BtnDecline.AppearanceHovered.BorderColor = Color.Gray;
+            BtnDecline.AppearanceHovered.Options.UseBackColor = true;
+            BtnDecline.AppearanceHovered.Options.UseBorderColor = true;
+            BtnDecline.ImageOptions.Image = (Image)resources.GetObject("BtnDecline.ImageOptions.Image");
+            BtnDecline.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleCenter;
+            BtnDecline.Location = new Point(1034, 30);
+            BtnDecline.Name = "BtnDecline";
+            BtnDecline.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            BtnDecline.Size = new Size(43, 42);
+            BtnDecline.TabIndex = 9;
+            BtnDecline.Click += BtnDecline_Click;
+            // 
+            // btnAccept
+            // 
+            btnAccept.Appearance.BackColor = Color.Gray;
+            btnAccept.Appearance.BorderColor = Color.FromArgb(224, 224, 224);
+            btnAccept.Appearance.ForeColor = Color.Transparent;
+            btnAccept.Appearance.Options.UseBackColor = true;
+            btnAccept.Appearance.Options.UseBorderColor = true;
+            btnAccept.Appearance.Options.UseForeColor = true;
+            btnAccept.AppearanceHovered.BackColor = Color.Gray;
+            btnAccept.AppearanceHovered.BorderColor = Color.Gray;
+            btnAccept.AppearanceHovered.Options.UseBackColor = true;
+            btnAccept.AppearanceHovered.Options.UseBorderColor = true;
+            btnAccept.ImageOptions.Image = (Image)resources.GetObject("btnAccept.ImageOptions.Image");
+            btnAccept.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleCenter;
+            btnAccept.Location = new Point(968, 30);
+            btnAccept.Name = "btnAccept";
+            btnAccept.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            btnAccept.Size = new Size(43, 42);
+            btnAccept.TabIndex = 8;
+            btnAccept.Click += btnAccept_Click;
             // 
             // txtRequiredItemCount
             // 
             txtRequiredItemCount.Enabled = false;
-            txtRequiredItemCount.Location = new Point(1077, 39);
+            txtRequiredItemCount.Location = new Point(772, 39);
             txtRequiredItemCount.Name = "txtRequiredItemCount";
             txtRequiredItemCount.Properties.Appearance.Font = new Font("Tahoma", 9.75F);
             txtRequiredItemCount.Properties.Appearance.Options.UseFont = true;
@@ -339,21 +335,11 @@
             // 
             labelControl7.Appearance.Font = new Font("Tahoma", 9.75F);
             labelControl7.Appearance.Options.UseFont = true;
-            labelControl7.Location = new Point(935, 42);
+            labelControl7.Location = new Point(630, 42);
             labelControl7.Name = "labelControl7";
             labelControl7.Size = new Size(115, 16);
             labelControl7.TabIndex = 6;
             labelControl7.Text = "Gereken Ürün Sayısı";
-            // 
-            // txtOrderCode
-            // 
-            txtOrderCode.Enabled = false;
-            txtOrderCode.Location = new Point(729, 39);
-            txtOrderCode.Name = "txtOrderCode";
-            txtOrderCode.Properties.Appearance.Font = new Font("Tahoma", 9.75F);
-            txtOrderCode.Properties.Appearance.Options.UseFont = true;
-            txtOrderCode.Size = new Size(160, 22);
-            txtOrderCode.TabIndex = 5;
             // 
             // txtItemCode
             // 
@@ -374,16 +360,6 @@
             txtItemName.Properties.Appearance.Options.UseFont = true;
             txtItemName.Size = new Size(160, 22);
             txtItemName.TabIndex = 3;
-            // 
-            // labelControl6
-            // 
-            labelControl6.Appearance.Font = new Font("Tahoma", 9.75F);
-            labelControl6.Appearance.Options.UseFont = true;
-            labelControl6.Location = new Point(625, 42);
-            labelControl6.Name = "labelControl6";
-            labelControl6.Size = new Size(71, 16);
-            labelControl6.TabIndex = 2;
-            labelControl6.Text = "Sipariş Kodu";
             // 
             // labelControl5
             // 
@@ -409,13 +385,11 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1298, 574);
+            ClientSize = new Size(1218, 574);
             Controls.Add(groupControl1);
             Name = "OrderStockForm";
             Text = "OrderStockForm";
-            WindowState = FormWindowState.Normal;
             Load += OrderStockForm_Load;
-            Controls.SetChildIndex(groupControl1, 0);
             ((System.ComponentModel.ISupportInitialize)panelControl1).EndInit();
             panelControl1.ResumeLayout(false);
             panelControl1.PerformLayout();
@@ -428,14 +402,10 @@
             groupControl2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)GCList).EndInit();
             ((System.ComponentModel.ISupportInitialize)GVList).EndInit();
-            ((System.ComponentModel.ISupportInitialize)repoBtnBatchNumber).EndInit();
-            ((System.ComponentModel.ISupportInitialize)repoBtnOrderStockDelete).EndInit();
-            ((System.ComponentModel.ISupportInitialize)repoLUItemCode).EndInit();
             ((System.ComponentModel.ISupportInitialize)panelControl2).EndInit();
             panelControl2.ResumeLayout(false);
             panelControl2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)txtRequiredItemCount.Properties).EndInit();
-            ((System.ComponentModel.ISupportInitialize)txtOrderCode.Properties).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtItemCode.Properties).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtItemName.Properties).EndInit();
             ResumeLayout(false);
@@ -456,22 +426,18 @@
         private DevExpress.XtraEditors.PanelControl panelControl2;
         private DevExpress.XtraEditors.TextEdit txtRequiredItemCount;
         private DevExpress.XtraEditors.LabelControl labelControl7;
-        private DevExpress.XtraEditors.TextEdit txtOrderCode;
         private DevExpress.XtraEditors.TextEdit txtItemCode;
         private DevExpress.XtraEditors.TextEdit txtItemName;
-        private DevExpress.XtraEditors.LabelControl labelControl6;
         private DevExpress.XtraEditors.LabelControl labelControl5;
         private DevExpress.XtraEditors.LabelControl labelControl4;
         private DevExpress.XtraGrid.Columns.GridColumn gCId;
         private DevExpress.XtraGrid.Columns.GridColumn gCBatchNumber;
         private DevExpress.XtraGrid.Columns.GridColumn gCStockItemCount;
         private DevExpress.XtraGrid.Columns.GridColumn gCSeletedCount;
-        private DevExpress.XtraGrid.Columns.GridColumn gCDeleted;
-        private DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit repoBtnOrderStockDelete;
-        private DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit repoBtnBatchNumber;
-        private DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit repoLUItemCode;
         private DevExpress.XtraGrid.Columns.GridColumn gCOrderLineId;
         private DevExpress.XtraGrid.Columns.GridColumn gCStockId;
         private DevExpress.XtraGrid.Columns.GridColumn gCRemainingStockCount;
+        private DevExpress.XtraEditors.SimpleButton BtnDecline;
+        private DevExpress.XtraEditors.SimpleButton btnAccept;
     }
 }

@@ -7,6 +7,6 @@ namespace Business.Abstract
 {
     public interface IOrderLineService : IGenericService<orderline>
     {
-
+        void TDeleteLineWithStocks(int orderlineId);
     }
 }

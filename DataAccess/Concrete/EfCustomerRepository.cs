@@ -33,6 +33,17 @@ namespace DataAccess.Concrete
 
                 foreach (var line in lines)
                 {
+                    var linestock = _context.Set<orderstockreservation>().Where(o => o.orderlineid == line.id && o.deleted != "d").ToList();
+                    foreach (var ls in linestock)
+                    {
+                        var stock = _context.Set<stockonhand>().FirstOrDefault(s => s.id == ls.stockid);
+                        if (stock != null)
+                        {
+                            stock.itemcount += ls.selectedcount;
+                        }
+
+                        ls.deleted = "d";
+                    }
                     line.deleted = "d";
                 }
                 foreach (var order in orders)
@@ -40,7 +51,7 @@ namespace DataAccess.Concrete
                     order.deleted = "d";
                 }
 
-                var customer = _context.Set<customer>().Find(customerId);
+                var customer = _context.Set<customer>().FirstOrDefault(c=> c.id == customerId);
                 if (customer != null)
                 {
                     customer.deleted = "d";

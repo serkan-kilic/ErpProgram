@@ -81,6 +81,8 @@
             gVOrderLineList = new DevExpress.XtraGrid.Views.Grid.GridView();
             gCOrderLineId = new DevExpress.XtraGrid.Columns.GridColumn();
             gCItemId = new DevExpress.XtraGrid.Columns.GridColumn();
+            gCStockEntry = new DevExpress.XtraGrid.Columns.GridColumn();
+            repoBtnStockEntry = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
             gCOrderLineItem = new DevExpress.XtraGrid.Columns.GridColumn();
             repoBtnItemSelect = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
             gCOrderLineOrder = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -108,8 +110,6 @@
             labelControl10 = new DevExpress.XtraEditors.LabelControl();
             txtEditOrderDate = new DevExpress.XtraEditors.DateEdit();
             txtCompletedDate = new DevExpress.XtraEditors.DateEdit();
-            gCStockEntry = new DevExpress.XtraGrid.Columns.GridColumn();
-            repoBtnStockEntry = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
             ((System.ComponentModel.ISupportInitialize)xtraTabControl1).BeginInit();
             xtraTabControl1.SuspendLayout();
             tabList.SuspendLayout();
@@ -139,6 +139,7 @@
             groupControl5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gCOrderLineList).BeginInit();
             ((System.ComponentModel.ISupportInitialize)gVOrderLineList).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)repoBtnStockEntry).BeginInit();
             ((System.ComponentModel.ISupportInitialize)repoBtnItemSelect).BeginInit();
             ((System.ComponentModel.ISupportInitialize)repoLUOrder).BeginInit();
             ((System.ComponentModel.ISupportInitialize)repoOrderlineDelete).BeginInit();
@@ -154,7 +155,6 @@
             ((System.ComponentModel.ISupportInitialize)txtEditOrderDate.Properties.CalendarTimeProperties).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtCompletedDate.Properties).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtCompletedDate.Properties.CalendarTimeProperties).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)repoBtnStockEntry).BeginInit();
             SuspendLayout();
             // 
             // xtraTabControl1
@@ -606,6 +606,23 @@
             gCItemId.FieldName = "itemid";
             gCItemId.Name = "gCItemId";
             // 
+            // gCStockEntry
+            // 
+            gCStockEntry.Caption = "Stok Girişi";
+            gCStockEntry.ColumnEdit = repoBtnStockEntry;
+            gCStockEntry.Name = "gCStockEntry";
+            gCStockEntry.Visible = true;
+            gCStockEntry.VisibleIndex = 0;
+            gCStockEntry.Width = 67;
+            // 
+            // repoBtnStockEntry
+            // 
+            repoBtnStockEntry.AutoHeight = false;
+            repoBtnStockEntry.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) });
+            repoBtnStockEntry.Name = "repoBtnStockEntry";
+            repoBtnStockEntry.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.HideTextEditor;
+            repoBtnStockEntry.ButtonClick += repoBtnStockEntry_ButtonClick;
+            // 
             // gCOrderLineItem
             // 
             gCOrderLineItem.AppearanceCell.Options.UseTextOptions = true;
@@ -752,6 +769,7 @@
             txtOrderTotalPrice.Name = "txtOrderTotalPrice";
             txtOrderTotalPrice.Properties.Appearance.Font = new Font("Tahoma", 9.75F);
             txtOrderTotalPrice.Properties.Appearance.Options.UseFont = true;
+            txtOrderTotalPrice.Properties.NullText = "0,0";
             txtOrderTotalPrice.Size = new Size(160, 22);
             txtOrderTotalPrice.TabIndex = 27;
             // 
@@ -925,23 +943,6 @@
             txtCompletedDate.Size = new Size(160, 22);
             txtCompletedDate.TabIndex = 25;
             // 
-            // gCStockEntry
-            // 
-            gCStockEntry.Caption = "Stok Girişi";
-            gCStockEntry.ColumnEdit = repoBtnStockEntry;
-            gCStockEntry.Name = "gCStockEntry";
-            gCStockEntry.Visible = true;
-            gCStockEntry.VisibleIndex = 0;
-            gCStockEntry.Width = 67;
-            // 
-            // repoBtnStockEntry
-            // 
-            repoBtnStockEntry.AutoHeight = false;
-            repoBtnStockEntry.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) });
-            repoBtnStockEntry.Name = "repoBtnStockEntry";
-            repoBtnStockEntry.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.HideTextEditor;
-            repoBtnStockEntry.ButtonClick += repoBtnStockEntry_ButtonClick;
-            // 
             // OrderForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -982,6 +983,7 @@
             groupControl5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)gCOrderLineList).EndInit();
             ((System.ComponentModel.ISupportInitialize)gVOrderLineList).EndInit();
+            ((System.ComponentModel.ISupportInitialize)repoBtnStockEntry).EndInit();
             ((System.ComponentModel.ISupportInitialize)repoBtnItemSelect).EndInit();
             ((System.ComponentModel.ISupportInitialize)repoLUOrder).EndInit();
             ((System.ComponentModel.ISupportInitialize)repoOrderlineDelete).EndInit();
@@ -998,7 +1000,6 @@
             ((System.ComponentModel.ISupportInitialize)txtEditOrderDate.Properties).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtCompletedDate.Properties.CalendarTimeProperties).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtCompletedDate.Properties).EndInit();
-            ((System.ComponentModel.ISupportInitialize)repoBtnStockEntry).EndInit();
             ResumeLayout(false);
         }
 
