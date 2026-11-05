@@ -58,7 +58,7 @@
             btnOrderSale.Name = "btnOrderSale";
             btnOrderSale.Size = new Size(182, 56);
             btnOrderSale.TabIndex = 3;
-            btnOrderSale.Text = "Sipariş Satış Yönetimi";
+            btnOrderSale.Text = "Satış Sipariş Yönetimi";
             btnOrderSale.Click += btnOrderSale_Click;
             // 
             // btnItem

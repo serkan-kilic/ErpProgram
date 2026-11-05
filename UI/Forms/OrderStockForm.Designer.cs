@@ -388,6 +388,7 @@
             ClientSize = new Size(1218, 574);
             Controls.Add(groupControl1);
             Name = "OrderStockForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "OrderStockForm";
             Load += OrderStockForm_Load;
             ((System.ComponentModel.ISupportInitialize)panelControl1).EndInit();
