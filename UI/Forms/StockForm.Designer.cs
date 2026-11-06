@@ -212,6 +212,7 @@
             gCBatchNumber.Caption = "Parti Numarası";
             gCBatchNumber.FieldName = "batchnumber";
             gCBatchNumber.Name = "gCBatchNumber";
+            gCBatchNumber.OptionsColumn.AllowEdit = false;
             gCBatchNumber.Visible = true;
             gCBatchNumber.VisibleIndex = 2;
             gCBatchNumber.Width = 326;
