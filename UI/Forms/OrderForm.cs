@@ -42,6 +42,7 @@ namespace UI.Forms
         private int selectedCustomerId, selectedEditCustomerId, selectedOrderId;
         public Dictionary<string, orderstockreservation> data = new Dictionary<string, orderstockreservation>();
         private DataTable _orderLineTable = CreateOrderLineTable();
+        private readonly List<orderstockreservation> _changedItemReservations = new List<orderstockreservation>();
 
         public OrderForm(IOrderService orderService, IPaymentService paymentService, IOrderTypeService orderTypeService, IOrderStatusService orderStatusService, ICustomerService customerService, IItemService itemService, IOrderLineService orderLineService, IStockOnHandService stockOnHandService, IOrderStockReservationService orderStockReservationService)
         {
@@ -178,6 +179,7 @@ namespace UI.Forms
             txtEditOrderCode.Text = GenerateRandomCode();
             LoadOrderLines(0);
             data.Clear();
+            _changedItemReservations.Clear();
             ListData();
         }
         protected override void CloseWindow()
@@ -390,6 +392,7 @@ namespace UI.Forms
         }
         private void SaveStocks(int itemId, int orderlineId)
         {
+            FixChangedReservations();
             var stockReservations = _stockOnHandService.TGetAll().Where(s => s.itemid == itemId);
             foreach (var sr in stockReservations)
             {
@@ -417,6 +420,24 @@ namespace UI.Forms
                     _stockOnHandService.TUpdate(stock);
                 }
             }
+        }
+        private void FixChangedReservations()
+        {
+            foreach (var r in _changedItemReservations)
+            {
+                var res = _orderStockReservationService.TGetById(r.id);
+                if (res == null || res.deleted == "d")
+                {
+                    continue;
+                }
+                var stock = _stockOnHandService.TGetById(res.stockid);    
+                stock.itemcount += res.selectedcount;
+                _stockOnHandService.TUpdate(stock);
+
+                res.deleted = "d";
+                _orderStockReservationService.TUpdate(res);
+            }
+            _changedItemReservations.Clear();
         }
         private void CustomerDesicionTCorVkn(int customerId, ButtonEdit btn)
         {
@@ -621,7 +642,41 @@ namespace UI.Forms
 
         private void repoBtnItemSelect_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            var selectedOrderLineItemId = SelectEntity(_itemService.TGetAll().ToList(), "Ürün Seçim Sayfası");
+            List<int> itemIdinTable = new List<int>();
+            foreach (DataRow row in _orderLineTable.Rows)
+            {
+                itemIdinTable.Add(Convert.ToInt32(row["itemid"]));
+            }
+            var allItem = new List<item>();
+            foreach (var i in _itemService.TGetAll())
+            {
+                if (!itemIdinTable.Contains(i.id))//tablonun içinde item in id si varmıyı kontrol ediyor
+                {
+                    allItem.Add(i);
+                }
+            }
+
+            var oldItemId = Convert.ToInt32(gVOrderLineList.GetFocusedRowCellValue("itemid"));
+            var selectedOrderLineItemId = SelectEntity(allItem, "Ürün Seçim Sayfası");
+            if (oldItemId != selectedOrderLineItemId && oldItemId != 0 && selectedOrderLineItemId != 0)
+            {
+                var batches = _stockOnHandService.TGetAll()
+                    .Where(s => s.itemid == oldItemId)
+                    .ToList();
+
+                foreach (var b in batches)
+                {
+                    if (!data.TryGetValue(b.batchnumber, out var r))
+                    {
+                        continue;
+                    }
+                    if (r.id > 0)
+                    {
+                        _changedItemReservations.Add(r);
+                    }
+                    data.Remove(b.batchnumber);                                
+                }
+            }
             if (selectedOrderLineItemId == 0)
             {
                 return;
